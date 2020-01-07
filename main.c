@@ -4,6 +4,7 @@
 #include <math.h>
 #include <limits.h>
 #include <SDL2/SDL.h>
+#include "upng.h"
 
 const int map[MAP_NUM_ROWS][MAP_NUM_COLS] = {
     {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -54,10 +55,9 @@ int isGameRunning = FALSE;
 float ticksLastFrame;
 
 Uint32* colorBuffer = NULL;
-
 SDL_Texture* colorBufferTexture = NULL;
-
 Uint32* wallTexture = NULL;
+upng_t* pngTexture;
 
 void renderMap()
 {
@@ -340,15 +340,17 @@ void setup()
   player.turnSpeed = 45 * (PI / 100);
 
   colorBuffer = (Uint32*) malloc(sizeof(Uint32) * (Uint32)WINDOW_WIDTH * (Uint32)WINDOW_HEIGHT);
-
-  colorBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WINDOW_WIDTH, WINDOW_HEIGHT);
+  colorBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   wallTexture = (Uint32*)malloc(sizeof(Uint32) * (Uint32)TEXTURE_WIDTH * (Uint32)TEXTURE_HEIGHT);
-  for(int x = 0; x < TEXTURE_WIDTH; x++)
+  
+  pngTexture = upng_new_from_file(GRAYSTONE_TEXTURE_FILEPATH);
+  if(pngTexture != NULL)
   {
-    for(int y = 0; y < TEXTURE_HEIGHT; y++)
+    upng_decode(pngTexture);
+    if(upng_get_error(pngTexture) == UPNG_EOK)
     {
-      wallTexture[(TEXTURE_WIDTH * y) + x] = (x % 8 && y % 8) ? 0xFF0000FF : 0xFF000000;
+      wallTexture = (Uint32*) upng_get_buffer(pngTexture);
     }
   }
 }
@@ -454,7 +456,7 @@ void generate3DProjection()
 
     for(int y = 0; y < wallTopPixel; y++)
     {
-      colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFF99FFFF;
+      colorBuffer[(WINDOW_WIDTH * y) + i] = 0xebaa81; //ABGR
     }
 
     int textureOffsetX;
@@ -477,7 +479,7 @@ void generate3DProjection()
 
     for(int y = wallBottomPixel; y < WINDOW_HEIGHT; y++)
     {
-      colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFF737373;
+      colorBuffer[(WINDOW_WIDTH * y) + i] = 0x737373; //ABGR
     }
   }
 }
@@ -501,6 +503,7 @@ void render()
 
 void quit()
 {
+  free(wallTexture);
   free(colorBuffer);
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);

@@ -21,3 +21,13 @@
 #define NUM_RAYS WINDOW_WIDTH
 
 #define MINIMAP_SCALE_FACTOR 0.1
+
+#define REDBRICK_TEXTURE_FILEPATH "./images/redbrick.png"
+#define PURPLESTONE_TEXTURE_FILEPATH "./images/purplestone.png"
+#define MOSSYSTONE_TEXTURE_FILEPATH "./images/mossystone.png"
+#define GRAYSTONE_TEXTURE_FILEPATH "./images/graystone.png"
+#define COLORSTONE_TEXTURE_FILEPATH "./images/colorstone.png"
+#define BLUESTONE_TEXTURE_FILEPATH "./images/bluestone.png"
+#define WOOD_TEXTURE_FILEPATH "./images/wood.png"
+#define EAGLE_TEXTURE_FILEPATH "./images/eagle.png"
+#define PIKUMA_TEXTURE_FILEPATH "./images/pikuma.png"
