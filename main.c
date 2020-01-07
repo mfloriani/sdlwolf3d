@@ -57,6 +57,8 @@ Uint32* colorBuffer = NULL;
 
 SDL_Texture* colorBufferTexture = NULL;
 
+Uint32* wallTexture = NULL;
+
 void renderMap()
 {
   for (int i = 0; i < MAP_NUM_ROWS; i++)
@@ -340,6 +342,15 @@ void setup()
   colorBuffer = (Uint32*) malloc(sizeof(Uint32) * (Uint32)WINDOW_WIDTH * (Uint32)WINDOW_HEIGHT);
 
   colorBufferTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, WINDOW_WIDTH, WINDOW_HEIGHT);
+
+  wallTexture = (Uint32*)malloc(sizeof(Uint32) * (Uint32)TEXTURE_WIDTH * (Uint32)TEXTURE_HEIGHT);
+  for(int x = 0; x < TEXTURE_WIDTH; x++)
+  {
+    for(int y = 0; y < TEXTURE_HEIGHT; y++)
+    {
+      wallTexture[(TEXTURE_WIDTH * y) + x] = (x % 8 && y % 8) ? 0xFF0000FF : 0xFF000000;
+    }
+  }
 }
 
 void handleInput()
@@ -446,10 +457,22 @@ void generate3DProjection()
       colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFF99FFFF;
     }
 
+    int textureOffsetX;
+    if(rays[i].wasVerticalHit)
+    {
+      textureOffsetX = (int)rays[i].wallHitY % TILE_SIZE;
+    }
+    else
+    {
+      textureOffsetX = (int)rays[i].wallHitX % TILE_SIZE;
+    }
+
     for(int y = wallTopPixel; y < wallBottomPixel; y++)
     {
-      Uint32 color = rays[i].wasVerticalHit ? 0xFFFFFFFF : 0xFFCCCCCC;
-      colorBuffer[(WINDOW_WIDTH * y) + i] = color;
+      int distanceFromTop = y + (wallStripHeight / 2) - (WINDOW_HEIGHT / 2);
+      int textureOffsetY = distanceFromTop * ((float)TEXTURE_HEIGHT / wallStripHeight);
+      Uint32 texelColor = wallTexture[(TEXTURE_WIDTH * textureOffsetY) + textureOffsetX];
+      colorBuffer[(WINDOW_WIDTH * y) + i] = texelColor;
     }
 
     for(int y = wallBottomPixel; y < WINDOW_HEIGHT; y++)
